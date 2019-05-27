@@ -122,6 +122,12 @@ include_directories(
 #   src/${PROJECT_NAME}/rrt_exploration_tutorials.cpp
 # )
 
+add_executable(rrt_path src/path_goal.cpp)
+add_dependencies(rrt_path ${rrt_path_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(rrt_path
+ ${catkin_LIBRARIES}
+)
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure

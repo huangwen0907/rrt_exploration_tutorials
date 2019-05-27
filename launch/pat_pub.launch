@@ -1,0 +1,6 @@
+<launch>
+	<node pkg="rrt_exploration_tutorials" type = "rrt_path" name = "rrt_path_node" output= "screen">
+	<remap from = "goal" to = "/robot_1/move_base_simple/goal"/>
+	</node>
+
+</launch>

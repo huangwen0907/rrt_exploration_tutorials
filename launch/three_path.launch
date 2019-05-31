@@ -1,0 +1,17 @@
+<launch>
+<group ns="/robot_1">
+	<include file="$(find rrt_exploration_tutorials)/launch/includes/cmd_path.launch"/>
+	<arg name="namespace" value="robot_1"/>
+</group>
+
+<group ns="/robot_2">
+	<include file="$(find rrt_exploration_tutorials)/launch/includes/cmd_path.launch"/>
+	<arg name="namespace" value="robot_2"/>
+</group>
+
+<group ns="/robot_3">
+	<include file="$(find rrt_exploration_tutorials)/launch/includes/cmd_path.launch"/>
+	<arg name="namespace" value="robot_3"/>
+</group>
+
+</launch>

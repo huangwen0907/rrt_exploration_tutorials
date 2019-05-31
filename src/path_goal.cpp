@@ -43,6 +43,7 @@ int main(int argc, char ** argv)
         path[3].pose.position.x = -4.0;
         path[3].pose.position.y = 4.0;
         int count_pub = 0;
+        int num = 0;
         float deltax = 0.0f;
         float deltay = 0.0f;
         float delat_d = 0.0f;
@@ -65,11 +66,17 @@ int main(int argc, char ** argv)
 
                     path_pub.publish(path[count_pub]);
 
-                    count_pub ++;
 
-                if (count_pub >4) {
+		num ++;
+
+                if (count_pub >4 && num > 5) {
                     count_pub = 0;
+		    num = 0;
                 }
+
+		if (num > 5) {
+			count_pub ++;
+		}
 
             }
 

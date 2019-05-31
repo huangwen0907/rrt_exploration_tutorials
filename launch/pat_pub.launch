@@ -1,6 +1,20 @@
 <launch>
-	<node pkg="rrt_exploration_tutorials" type = "rrt_path" name = "rrt_path_node" output= "screen">
-	<remap from = "goal" to = "/robot_1/move_base_simple/goal"/>
-	</node>
+	<group ns="/robot_1">
+		<node pkg="rrt_exploration_tutorials" type = "rrt_path" name = "rrt_path_node_1" output= "screen">
+		<remap from = "goal" to = "/robot_1/move_base_simple/goal"/>
+		</node>
+	</group>
+
+	<group ns="/robot_2">
+		<node pkg="rrt_exploration_tutorials" type = "rrt_path" name = "rrt_path_node_2" output= "screen">
+		<remap from = "goal" to = "/robot_2/move_base_simple/goal"/>
+		</node>
+	</group>
+
+	<group ns="/robot_3">
+		<node pkg="rrt_exploration_tutorials" type = "rrt_path" name = "rrt_path_node_3" output= "screen">
+		<remap from = "goal" to = "/robot_3/move_base_simple/goal"/>
+		</node>
+	</group>
 
 </launch>

@@ -108,7 +108,7 @@ void calculate_vel(float delta_dt)
         // 'robot2_direction.z' current direction
         float angle_err = robot2_2_robot1_direction -  robot2_direction.z ;
         // calculate the desired rates
-        vel_command.angular.z = constrain(0.05 * angle_err / delta_dt,-2.0,2.0);
+        vel_command.angular.z = constrain(0.1 * angle_err / delta_dt,-2.0,2.0);
 //        float feedforward = (robot2_yaw_last - robot2_direction.z)/delta_dt - rates_last;
 //        vel_command.angular.z = constrain(vel_command.angular.z+feedforward,-1,1);
 

@@ -9,7 +9,9 @@
 
 geometry_msgs::Transform robot1_state;
 geometry_msgs::Transform robot2_state;
+geometry_msgs::Transform robot3_state;
 geometry_msgs::Twist vel_command;
+
 float delta_dt;
 float last_time = 0;
 float safe_distance = 0.2;
@@ -19,7 +21,7 @@ float rates_last = 0.0f;
 
 /*******The function  list *********/
 float get_dt(ros::Time last);
-void   calculate_vel(float delta_dt);
+geometry_msgs::Twist  calculate_vel(float delta_dt,geometry_msgs::Transform state);
 geometry_msgs::Vector3 get_euler_from_quaternion(tf::Quaternion q);
 float sign(float delta);
 float constrain(float delta,float min,float max);
@@ -35,6 +37,12 @@ void tf_Cb(const tf2_msgs::TFMessage::ConstPtr& msg) {
         robot2_state.translation.x = msg->transforms[0].transform.translation.x;
         robot2_state.translation.y = msg->transforms[0].transform.translation.y;
         robot2_state.rotation = msg->transforms[0].transform.rotation;
+    }
+
+    if (msg->transforms[0].header.frame_id == "robot_3/odom") {
+        robot3_state.translation.x = msg->transforms[0].transform.translation.x;
+        robot3_state.translation.y = msg->transforms[0].transform.translation.y;
+        robot3_state.rotation = msg->transforms[0].transform.rotation;
     }
 }
 
@@ -58,6 +66,9 @@ int main(int argc, char** argv) {
 
     ros::Publisher vel_pub = nh.advertise<geometry_msgs::Twist>("/robot_2/mobile_base/commands/velocity",10);
 
+    ros::Publisher vel_pub_3 = nh.advertise<geometry_msgs::Twist>("/robot_3/mobile_base/commands/velocity",10);
+
+
 
 
 
@@ -70,9 +81,15 @@ int main(int argc, char** argv) {
         float curr_time = get_dt(begin_time);
         delta_dt = curr_time - last_time;
 
-        calculate_vel(delta_dt);
+        // calculate the robot2's vel
+        geometry_msgs::Twist vel_target = calculate_vel(delta_dt,robot2_state);
+        vel_pub.publish(vel_target);
 
-        vel_pub.publish(vel_command);
+        // calculate the robot3's vel
+        vel_target = calculate_vel(delta_dt,robot3_state);
+        vel_pub_3.publish(vel_target);
+
+
 
         last_time = curr_time;
         ros::spinOnce();
@@ -91,17 +108,17 @@ float get_dt(ros::Time last)
     return (currTimeSec + currTimenSec);
 }
 
-void calculate_vel(float delta_dt)
+geometry_msgs::Twist calculate_vel(float delta_dt,geometry_msgs::Transform state)
 {
     ROS_INFO("DT:%f ............................",delta_dt);
     if (delta_dt > 0){
-        float x_err = (robot1_state.translation.x - robot2_state.translation.x);
-        float y_err = (robot1_state.translation.y - robot2_state.translation.y);
+        float x_err = (robot1_state.translation.x - state.translation.x);
+        float y_err = (robot1_state.translation.y - state.translation.y);
         // the angle between robot2 and robot1
         float robot2_2_robot1_direction = atan2(y_err,x_err);
 
         // Robot2's Attitude
-        tf::Quaternion quat_robot2(robot2_state.rotation.x,robot2_state.rotation.y,robot2_state.rotation.z,robot2_state.rotation.w);
+        tf::Quaternion quat_robot2(state.rotation.x,state.rotation.y,state.rotation.z,state.rotation.w);
         geometry_msgs::Vector3 robot2_direction = get_euler_from_quaternion(quat_robot2);
 
         // 'robot2_2_robot1_direction' target direction
@@ -109,9 +126,6 @@ void calculate_vel(float delta_dt)
         float angle_err = robot2_2_robot1_direction -  robot2_direction.z ;
         // calculate the desired rates
         vel_command.angular.z = constrain(0.1 * angle_err / delta_dt,-2.0,2.0);
-//        float feedforward = (robot2_yaw_last - robot2_direction.z)/delta_dt - rates_last;
-//        vel_command.angular.z = constrain(vel_command.angular.z+feedforward,-1,1);
-
 
         float pos_err = sqrt(pow(x_err,2) + pow(y_err,2));
         geometry_msgs::Vector3 vel;
@@ -144,6 +158,7 @@ void calculate_vel(float delta_dt)
 
          vel_command.linear = vel;
     }
+    return vel_command;
 
 }
 

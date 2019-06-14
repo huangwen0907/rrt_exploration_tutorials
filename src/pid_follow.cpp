@@ -6,11 +6,16 @@
 #include <geometry_msgs/Vector3.h>
 #include <tf/transform_broadcaster.h>
 
+#include <rrt_exploration_tutorials/Command.h>
 
 geometry_msgs::Transform robot1_state;
 geometry_msgs::Transform robot2_state;
 geometry_msgs::Transform robot3_state;
 geometry_msgs::Twist vel_command;
+bool robot2_command = false;
+bool robot3_command = false;
+
+rrt_exploration_tutorials::Command command; //the command for control the robot2 or robot3
 
 float delta_dt;
 float last_time = 0;
@@ -47,13 +52,10 @@ void tf_Cb(const tf2_msgs::TFMessage::ConstPtr& msg) {
 }
 
 
-//void tf_cb2(const tf2_msgs::TFMessage::ConstPtr& msg){
-//    if (msg->transforms[0].header.frame_id == "robot_2/odom") {
-//        robot2_state.translation.x = msg->transforms[0].transform.translation.x;
-//        robot2_state.translation.y = msg->transforms[0].transform.translation.y;
-//        robot2_state.rotation = msg->transforms[0].transform.rotation;
-//    }
-//}
+void command_Cb(const rrt_exploration_tutorials::Command::ConstPtr& msg){
+    command.robot_id = msg->robot_id;
+    command.start = msg->start;
+}
 
 
 int main(int argc, char** argv) {
@@ -61,6 +63,8 @@ int main(int argc, char** argv) {
 
     ros::NodeHandle nh;
     ros::Subscriber tf_sub = nh.subscribe<tf2_msgs::TFMessage>("/tf",10,tf_Cb);
+
+    ros::Subscriber command_sub = nh.subscribe<rrt_exploration_tutorials::Command>("command", 1, command_Cb);
 
 //    ros::Subscriber tf_sub2 = nh.subscribe<tf2_msgs::TFMessage>("/tf",10,tf_cb2);
 
@@ -83,13 +87,35 @@ int main(int argc, char** argv) {
 
         // calculate the robot2's vel
         geometry_msgs::Twist vel_target = calculate_vel(delta_dt,robot2_state);
-        vel_pub.publish(vel_target);
+
+        // start robot2's movements
+        if (command.robot_id == 2) {
+            if (command.start) {
+                robot2_command = true;
+            } else {
+                robot2_command = false;
+            }
+        }
+
+        if (robot2_command) {
+            vel_pub.publish(vel_target);
+        }
 
         // calculate the robot3's vel
         vel_target = calculate_vel(delta_dt,robot3_state);
-        vel_pub_3.publish(vel_target);
+        if (command.robot_id == 3) {
+            if (command.start) {
+                robot3_command = true;
+            } else {
+                robot3_command = false;
+            }
+        }
 
+        if (robot3_command) {
+            vel_pub_3.publish(vel_target);
+        }
 
+        ROS_INFO("~~~~~~~ robot2_command:%d  robot3_command: %d ~~~~~~~~~~~",robot2_command,robot3_command);
 
         last_time = curr_time;
         ros::spinOnce();
@@ -144,7 +170,7 @@ geometry_msgs::Twist calculate_vel(float delta_dt,geometry_msgs::Transform state
 //                 vel.y = vel.y * vel_max/vel_length;
             };
 
-            ROS_INFO("angle_err:%f  x_err :%f y_err :%f  rates:%f", angle_err*57.3,x_err,y_err,vel_command.angular.z*57.3);
+            ROS_INFO("angle_err:%f  x_err :%f y_err :%f  rates:%f",angle_err*57.3,x_err,y_err,vel_command.angular.z*57.3);
 
             robot2_yaw_last = robot2_2_robot1_direction;
             rates_last = vel_command.angular.z;

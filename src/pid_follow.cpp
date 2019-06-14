@@ -123,7 +123,7 @@ geometry_msgs::Twist calculate_vel(float delta_dt,geometry_msgs::Transform state
 
         // 'robot2_2_robot1_direction' target direction
         // 'robot2_direction.z' current direction
-        float angle_err = robot2_2_robot1_direction -  robot2_direction.z ;
+        float angle_err =  robot2_2_robot1_direction - robot2_direction.z;
         // calculate the desired rates
         vel_command.angular.z = constrain(0.1 * angle_err / delta_dt,-2.0,2.0);
 
@@ -135,10 +135,10 @@ geometry_msgs::Twist calculate_vel(float delta_dt,geometry_msgs::Transform state
             vel.y = 0.0f;
             vel.z = 0.0f;
 
-            float vel_max = 0.5;
+            float vel_max = 0.3;
 
             float vel_length = sqrt(pow(vel.x,2)+ pow(vel.y,2));
-            vel_max = fabsf(angle_err) < 0.1? vel_max: 0.001f * vel_max;
+            vel_max = fabsf(angle_err) < 0.05? vel_max: 0.001f * vel_max;
             if (vel_length > vel_max) {
                  vel.x = vel_max;
 //                 vel.y = vel.y * vel_max/vel_length;

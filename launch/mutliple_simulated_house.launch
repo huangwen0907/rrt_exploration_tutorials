@@ -13,6 +13,7 @@ Launch file for running the multirobot simulation on gazebo
 </include>
 
 
+<node pkg="rrt_exploration_tutorials" type="pid_follow" name="pid_follow" output="screen"/>
 
 
 <!-- spawn robot 1-->

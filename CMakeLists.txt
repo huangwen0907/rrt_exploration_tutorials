@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -121,6 +122,13 @@ include_directories(
 # add_library(rrt_exploration_tutorials
 #   src/${PROJECT_NAME}/rrt_exploration_tutorials.cpp
 # )
+
+add_executable(pid_follow src/pid_follow.cpp)
+add_dependencies(pid_follow ${pid_follow_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pid_follow
+ ${catkin_LIBRARIES}
+)
+
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries

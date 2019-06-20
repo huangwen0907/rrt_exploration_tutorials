@@ -12,8 +12,8 @@ geometry_msgs::Transform robot1_state;
 geometry_msgs::Transform robot2_state;
 geometry_msgs::Transform robot3_state;
 geometry_msgs::Twist vel_command;
-bool robot2_command = false;
-bool robot3_command = false;
+bool robot2_command = true;
+bool robot3_command = true;
 
 rrt_exploration_tutorials::Command command; //the command for control the robot2 or robot3
 
@@ -157,7 +157,7 @@ geometry_msgs::Twist calculate_vel(float delta_dt,geometry_msgs::Transform state
         geometry_msgs::Vector3 vel;
 
         if (pos_err > safe_distance){
-            vel.x = pos_err/delta_dt;
+            vel.x = (pos_err- safe_distance)/delta_dt;
             vel.y = 0.0f;
             vel.z = 0.0f;
 

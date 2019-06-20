@@ -5,6 +5,7 @@
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/Vector3.h>
 #include <tf/transform_broadcaster.h>
+#include <nav_msgs/Path.h>
 
 #include <rrt_exploration_tutorials/Command.h>
 
@@ -12,6 +13,7 @@ geometry_msgs::Transform robot1_state;
 geometry_msgs::Transform robot2_state;
 geometry_msgs::Transform robot3_state;
 geometry_msgs::Twist vel_command;
+nav_msgs::Path plan_path_sample;
 bool robot2_command = true;
 bool robot3_command = true;
 
@@ -57,6 +59,14 @@ void command_Cb(const rrt_exploration_tutorials::Command::ConstPtr& msg){
     command.start = msg->start;
 }
 
+void plan_Cb(const nav_msgs::Path::ConstPtr& msg){
+    plan_path_sample.header = msg->header;
+    plan_path_sample.poses.resize(msg->poses.size());
+    for (unsigned int i = 0; i < msg->poses.size(); i++) {
+        plan_path_sample.poses[i] = msg->poses[i];
+    }
+}
+
 
 int main(int argc, char** argv) {
     ros::init(argc,argv,"pid_follow");
@@ -65,6 +75,9 @@ int main(int argc, char** argv) {
     ros::Subscriber tf_sub = nh.subscribe<tf2_msgs::TFMessage>("/tf",10,tf_Cb);
 
     ros::Subscriber command_sub = nh.subscribe<rrt_exploration_tutorials::Command>("command", 1, command_Cb);
+
+    ros::Subscriber plan_sub = nh.subscribe<nav_msgs::Path>("/robot_1/move_base_node/NavfnROS/plan", 1, plan_Cb);
+
 
 //    ros::Subscriber tf_sub2 = nh.subscribe<tf2_msgs::TFMessage>("/tf",10,tf_cb2);
 

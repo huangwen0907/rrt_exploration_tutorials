@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   message_generation
+  nav_msgs
 )
 
 ## System dependencies are found with CMake's conventions

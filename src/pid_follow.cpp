@@ -16,6 +16,7 @@ geometry_msgs::Twist vel_command;
 nav_msgs::Path plan_path_sample;
 bool robot2_command = true;
 bool robot3_command = true;
+bool direction_follow = false; // the command which allow the slave's path is following the master's postion orientation.
 
 rrt_exploration_tutorials::Command command; //the command for control the robot2 or robot3
 
@@ -86,9 +87,6 @@ int main(int argc, char** argv) {
     ros::Publisher vel_pub_3 = nh.advertise<geometry_msgs::Twist>("/robot_3/mobile_base/commands/velocity",10);
 
 
-
-
-
     ros::Rate loop(10);
 
     ros::Time begin_time = ros::Time::now();
@@ -98,37 +96,41 @@ int main(int argc, char** argv) {
         float curr_time = get_dt(begin_time);
         delta_dt = curr_time - last_time;
 
-        // calculate the robot2's vel
-        geometry_msgs::Twist vel_target = calculate_vel(delta_dt,robot2_state);
+        // the command which allow the slave's path is following the master's postion orientation.
+        if (direction_follow) {
+            // calculate the robot2's vel
+            geometry_msgs::Twist vel_target = calculate_vel(delta_dt,robot2_state);
 
-        // start robot2's movements
-        if (command.robot_id == 2) {
-            if (command.start) {
-                robot2_command = true;
-            } else {
-                robot2_command = false;
+            // start robot2's movements
+            if (command.robot_id == 2) {
+                if (command.start) {
+                    robot2_command = true;
+                } else {
+                    robot2_command = false;
+                }
             }
-        }
 
-        if (robot2_command) {
-            vel_pub.publish(vel_target);
-        }
-
-        // calculate the robot3's vel
-        vel_target = calculate_vel(delta_dt,robot3_state);
-        if (command.robot_id == 3) {
-            if (command.start) {
-                robot3_command = true;
-            } else {
-                robot3_command = false;
+            if (robot2_command) {
+                vel_pub.publish(vel_target);
             }
+
+            // calculate the robot3's vel
+            vel_target = calculate_vel(delta_dt,robot3_state);
+            if (command.robot_id == 3) {
+                if (command.start) {
+                    robot3_command = true;
+                } else {
+                    robot3_command = false;
+                }
+            }
+
+            if (robot3_command) {
+                vel_pub_3.publish(vel_target);
+            }
+            ROS_INFO("~~~~~~~ robot2_command:%d  robot3_command: %d ~~~~~~~~~~~",robot2_command,robot3_command);
         }
 
-        if (robot3_command) {
-            vel_pub_3.publish(vel_target);
-        }
 
-        ROS_INFO("~~~~~~~ robot2_command:%d  robot3_command: %d ~~~~~~~~~~~",robot2_command,robot3_command);
 
         last_time = curr_time;
         ros::spinOnce();
